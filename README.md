@@ -1,8 +1,10 @@
 # Experimenting with generative art
 
-These posts will be heavily inspired by the work of Anders Hoff, which has done some really interesting things on using simple rules to create emergent art. Besides sharing is work and the [code he uses to generate them](https://github.com/inconvergent), he also writes about his process and how he creates what he does on [his website](https://inconvergent.net).
+Here I try and create a set of simple rules for which interact to (hopefully) create interesting emergent patterns. 
 
-I feel the need to clearly cite him, as most of what I'll be doing here is copying from his work as a starting point.
+<img src="examples/random_walks_jumps.svg" width="50%">
+
+These posts will be heavily inspired by the work of Anders Hoff, which has done some really interesting things in this area. Besides sharing is work and the [code he uses to generate them](https://github.com/inconvergent), he also writes about his process and how he creates what he does on [his website](https://inconvergent.net).
 
 ## Usage
 
