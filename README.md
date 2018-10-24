@@ -2,7 +2,7 @@
 
 Here I try and create a set of simple rules for which interact to (hopefully) create interesting emergent patterns. 
 
-<img src="examples/random_walks_jumps.svg" width="50%">
+<img src="examples/random_walks_jumps.svg" width="30%">
 
 These posts will be heavily inspired by the work of Anders Hoff, which has done some really interesting things in this area. Besides sharing is work and the [code he uses to generate them](https://github.com/inconvergent), he also writes about his process and how he creates what he does on [his website](https://inconvergent.net).
 
