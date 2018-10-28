@@ -22,7 +22,7 @@ class DrawGraph:
             raise ValueError
         self.edges.add((ind_1, ind_2))
 
-    def closest_vert(self, pos, excluding=[]):
+    def closest_vert_dist(self, pos, excluding=[]):
         dist = np.linalg.norm(self.verts - pos, axis=1)
         dist[excluding] += dist.max() + 1
-        return dist.min(), dist.argmin()
+        return dist.min()

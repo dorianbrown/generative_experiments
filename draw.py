@@ -6,6 +6,7 @@ class Canvas:
     def __init__(self, width, height, dpi, fname, bg_rgb):
         self.width = width*dpi
         self.height = height*dpi
+        self.dpi = dpi
         self.fname = fname
         self.bg_rgb = bg_rgb
 
@@ -32,7 +33,7 @@ class Canvas:
         self.ctx.move_to(*edge[0])
         self.ctx.line_to(*edge[1])
         self.ctx.save()
-        self.ctx.set_line_width(line_width)
+        self.ctx.set_line_width(line_width*self.dpi)
         self.ctx.stroke_preserve()
         self.ctx.fill()
         self.ctx.restore()
