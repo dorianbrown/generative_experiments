@@ -6,6 +6,7 @@ __pycache__/
 # Pycharm
 .idea/
 
+# Img output
 temp/
 
 # C extensions
