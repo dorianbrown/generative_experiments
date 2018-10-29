@@ -10,13 +10,13 @@ from draw import Canvas
 from fn import Fn
 
 init_vert = [0.5, 0.5]
-edge_length = 0.001
+edge_length = 0.0025
 
 graph = DrawGraph()
 graph.add_vertex(init_vert)
 
 tries = 0
-while len(graph.verts) < 150_000:
+while len(graph.verts) < 17_500:
     if len(graph.verts) % 100 == 0 and tries == 0:
         print(f"vertices: {len(graph.verts)}")
     tries += 1
@@ -40,7 +40,7 @@ cnv_settings = {
     "dpi": 300,
     "width": 10,
     "height": 10,
-    "bg_rgb": (0.95, 0.95, 0.95)
+    "bg_rgb": (0.05, 0.05, 0.05)
 }
 
 with Canvas(**cnv_settings) as cnv:
@@ -49,4 +49,4 @@ with Canvas(**cnv_settings) as cnv:
     for edge in graph.edges:
         edge_coord = [graph.verts[i] for i in edge]
         if np.linalg.norm(edge_coord[0] - edge_coord[1]) < 2*edge_length:
-            cnv.draw_edge(edge_coord, 0.01, [0.3, 0.3, 0.3])
+            cnv.draw_edge(edge_coord, 0.01, [0.95, 0.95, 0.95])
