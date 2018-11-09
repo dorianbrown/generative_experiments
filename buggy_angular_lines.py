@@ -25,21 +25,20 @@ cnv_conf = {
     "bg_rgb": [(0.05, 0.05, 0.05), (0.15, 0.15, 0.15)]
 }
 
-n_lines = 1000
+n_lines = 3000
 cm = cm.viridis
 
 # Draw to canvas
 with Canvas(**cnv_conf) as cnv:
 
     angle = 0.5*pi*np.random.uniform()
-    angle = 0.25*pi
     y0 = np.random.uniform(0.1*1, 1, n_lines)
-    x0 = y0*np.tan(angle)
+    x0 = y0*np.tan(y0)
     col_mid = choice(y0)
-    col_vec = (y0 - min(y0))/max(y0 - min(y0))
+    col_vec = 1.1 - y0 + np.random.normal(0, 0.5, n_lines)
+    col_vec = (col_vec - min(col_vec))/(max(col_vec) - min(col_vec))
     colors = cm(col_vec, alpha=0.15)
 
     for x, y, col in zip(x0, y0, colors):
         edge = [[0, y], [x, 0]]
         cnv.draw_edge(edge, 0.00001, col)
-
