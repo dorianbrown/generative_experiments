@@ -1,4 +1,11 @@
 import cairo as cr
+import os
+
+
+def normalize(vec, nmin, nmax):
+    a = (nmax - nmin)/(max(vec) - min(vec))
+    b = nmax - max(vec)*(nmax - nmin)/(max(vec) - min(vec))
+    return (vec - min(vec)) / max(vec - min(vec))
 
 
 class Canvas:
@@ -65,6 +72,7 @@ class Canvas:
         # Close canvas and export it
         self.surface.write_to_png(f"{self.fname}.png")
         self.surface.finish()
+        os.system(f"eog {self.fname}.png")
 
     def draw_edge(self, edge, line_width, rgb):
         self.ctx.set_source_rgba(*rgb)
