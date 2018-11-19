@@ -8,6 +8,7 @@ __pycache__/
 
 # Img output
 temp/
+publish/original
 *.svg
 
 # C extensions
