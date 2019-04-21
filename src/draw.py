@@ -1,70 +1,37 @@
-import cairo as cr
-import os
+import cairocffi as cr
+import logging
+from math import sqrt
+from time import time
 
+import numpy as np
+from webcolors import hex_to_rgb
 
-def normalize(vec, nmin, nmax):
-    a = (nmax - nmin)/(max(vec) - min(vec))
-    b = nmax - max(vec)*(nmax - nmin)/(max(vec) - min(vec))
-    return (vec - min(vec)) / max(vec - min(vec))
+log = logging.getLogger('my_logger')
 
 
 class Canvas:
 
-    def __init__(self, width, height, dpi, fname, bg_rgb):
-        """
-        Create a canvas object.
-        :param width: Width in inch (of inner canvas)
-        :param height: Height in inch (of inner canvas)
-        :param dpi: Dots-per-inch of final png
-        :param fname:
-        :param bg_rgb:
-        :param zoom: Fractional border size between outer and inner canvas
-        """
-        self.inner_width = width * dpi
-        self.inner_height = height * dpi
-        self.dpi = dpi
+    def __init__(self, width, height, bg, fg, fname="tmp"):
+        self.width = width
+        self.height = height
+        self.bg = bg
+        self.fg = fg
         self.fname = fname
-        self.zoom_factor = 1.1
-        if width > height:
-            self.outer_width = self.inner_width * self.zoom_factor
-            self.outer_height = self.inner_width * self.zoom_factor
-        else:
-            self.outer_width = self.inner_height * self.zoom_factor
-            self.outer_height = self.inner_height * self.zoom_factor
-        if len(bg_rgb) is 1:
-            self.bg_rgb = bg_rgb[0]
-            self.fg_rgb = bg_rgb[0]
-        elif len(bg_rgb) is 2:
-            self.bg_rgb = bg_rgb[0]
-            self.fg_rgb = bg_rgb[1]
+        self.t0 = time()
 
     def __enter__(self):
-        self.surface = cr.SVGSurface(f"{self.fname}.svg",
-                                     self.outer_width,
-                                     self.outer_height)
+        log.debug(f"Creating canvas object with [{self.width}, {self.height}] dims")
+        self.surface = cr.ImageSurface(cr.FORMAT_ARGB32, self.width, self.height)
+        # Set background color
         self.ctx = cr.Context(self.surface)
-
+        self.ctx.set_antialias(cr.ANTIALIAS_FAST)
         self.ctx.save()
-        self.ctx.set_source_rgb(*self.bg_rgb)
+        self.set_color(self.bg)
         self.ctx.paint()
         self.ctx.restore()
-
-        # Paint inner background
-        self.ctx.save()
-        self.ctx.set_source_rgb(*self.fg_rgb)
-        y_top = 0.5*(self.outer_height - self.inner_height)
-        x_top = 0.5*(self.outer_width - self.inner_width)
-        self.ctx.rectangle(x_top, y_top, self.inner_width, self.inner_height)
-        self.ctx.fill()
-        self.ctx.restore()
-
-        xtrans = 0.5 * (self.outer_width - self.inner_width)
-        ytrans = 0.5 * (self.outer_height - self.inner_height)
-        xmult = self.inner_width
-        ymult = self.inner_height
-
-        trans_matrix = cr.Matrix(x0=xtrans, xx=xmult, y0=ytrans, yy=ymult, xy=0, yx=0)
-        self.ctx.set_matrix(trans_matrix)
+        # Transform coordinates so that origin is at bottom-right
+        # Two operations, translate to bottom and flip y coordinate
+        self.ctx.set_matrix(cr.Matrix(yy=-1, y0=self.height))
 
         return self
 
@@ -72,14 +39,50 @@ class Canvas:
         # Close canvas and export it
         self.surface.write_to_png(f"{self.fname}.png")
         self.surface.finish()
-        os.system(f"eog {self.fname}.png")
+        print(f"Total running time: {round(time() - self.t0)} seconds")
+        print(f"Drawing saved to: {self.fname}.png")
 
-    def draw_edge(self, edge, line_width, rgb):
-        self.ctx.set_source_rgba(*rgb)
-        self.ctx.set_line_width(line_width * self.dpi)
-        self.ctx.move_to(*edge[0])
-        self.ctx.line_to(*edge[1])
-        self.ctx.save()
-        self.ctx.stroke_preserve()
-        self.ctx.fill()
-        self.ctx.restore()
+    def draw_pixel(self, xy, rgba):
+        # We need to shift the line by (1,1) in order to get a square
+        to_xy = tuple(x + 1 for x in xy)
+        self.draw_line(xy, to_xy, rgba)
+
+    def draw_line(self, from_xy, to_xy, rgba=None, width=1):
+        log.debug(f"Initializing line {from_xy} => {to_xy}")
+        if rgba is None:
+            rgba = self.fg
+        self.ctx.move_to(*from_xy)
+        self.ctx.line_to(*to_xy)
+        self.set_color(rgba)
+        self.ctx.set_line_width(width)
+        self.ctx.stroke()
+        log.debug(f"Drawing line")
+
+    def set_color(self, color):
+        # Sets line color to rgb, rgba or hex
+        log.debug(f"Setting color to {color}")
+        if len(color) == 3:
+            self.ctx.set_source_rgb(*color)
+        elif len(color) == 4:
+            self.ctx.set_source_rgba(*color)
+        elif len(color) == 7:
+            rgb = list(hex_to_rgb(color))
+            log.debug(f"Hex {color} converted to {rgb}")
+            self.ctx.set_source_rgb(*rgb)
+
+    def get_oob(self, pos):
+        return np.all(np.logical_or(pos <= [0, 0], pos >= [self.width, self.height]), axis=1)
+
+    def sandpaint(self, from_xy, to_xy, rgb=(0, 0, 0), alpha=0.001, n=100):
+        # # Scale frequency to line length
+        dist = sqrt(sum((px - qx) ** 2.0 for px, qx in zip(from_xy, to_xy)))
+        n = round(n*dist)
+
+        # Create n random points on line
+        a = np.random.rand(n).reshape(-1, 1)
+        from_xy = np.tile(from_xy, n).reshape(-1, 2)
+        to_xy = np.tile(to_xy, n).reshape(-1, 2)
+        sand_points = from_xy*a + to_xy*(1-a)
+
+        for pnt in sand_points:
+            self.draw_pixel(pnt, (*rgb, alpha))
