@@ -1,13 +1,14 @@
-#!/usr/bin/env pypy3
+#!/usr/bin/env python
 import numpy as np
 
 from src.draw import Canvas
+from matplotlib import cm
 
 small_conf = {
-    "width": 2000,
-    "height": 2000,
+    "width": 4000,
+    "height": 4000,
     "bg": (0, 0, 0),
-    "fg": (255, 255, 255, 0.1)
+    "fg": (255, 255, 255, 0.25)
 }
 
 
@@ -22,24 +23,28 @@ def acc_vec(pos, mass):
 with Canvas(**small_conf) as c:
 
     # Initial particle conditions
-    n = 5000
+    n = 2000
     # pos = np.random.multivariate_normal([500, 500], [[1000, 250], [250, 1000]], n)
-    pos = np.random.uniform(0, 2000, (n, 2))
+    pos = np.random.uniform(0, 4000, (n, 2))
     mass = np.ones(n)*500
     # Add radial initial velocity
     vel = np.zeros((n, 2), dtype=np.float)
-    dt = 0.25
+    dt = 0.5
 
     while pos.size > 1:
         acc = acc_vec(pos, mass)
         vel += acc*dt
         pos_new = pos + vel*dt
 
-        for old, new in zip(pos, pos_new):
-            c.draw_line(old, new)
+        for old, new, v in zip(pos, pos_new, np.linalg.norm(vel, axis=1)):
+            alpha = min(1, 1 / v)
+            color = (*cm.viridis(v/10)[:3], alpha)
+            c.draw_line(old, new, rgba=color, width=4)
 
-        # Remove points no longer on canvas
-        remove_idx = c.get_oob(pos_new)
+        # Remove points we don't want to draw
+        oob_idx = c.get_oob(pos_new)
+        # too_fast_idx = np.linalg.norm(vel, axis=1) > 8
+        remove_idx = oob_idx # | too_fast_idx
 
         pos = pos_new[~remove_idx]
         mass = mass[~remove_idx]

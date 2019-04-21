@@ -1,4 +1,4 @@
-import cairo as cr
+import cairocffi as cr
 import logging
 from math import sqrt
 from time import time
@@ -24,6 +24,7 @@ class Canvas:
         self.surface = cr.ImageSurface(cr.FORMAT_ARGB32, self.width, self.height)
         # Set background color
         self.ctx = cr.Context(self.surface)
+        self.ctx.set_antialias(cr.ANTIALIAS_FAST)
         self.ctx.save()
         self.set_color(self.bg)
         self.ctx.paint()
