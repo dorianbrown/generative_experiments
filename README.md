@@ -3,7 +3,7 @@
 Here I try and create a set of simple rules for which interact to (hopefully) create interesting emergent patterns.
 
 <p align="center">
-<img src="publish/1k/20181111-211236-040318-eed9ed1-e299eb4.png" width="60%">
+<img src="assets/20181118-010533-083668-dc7a03f-f743727.png" width="60%">
 </p>
 
 These posts will be heavily inspired by the work of Anders Hoff, which has done some really interesting things in this area. Besides sharing is work and the [code he uses to generate them](https://github.com/inconvergent), he also writes about his process and how he creates what he does on [his website](https://inconvergent.net).
