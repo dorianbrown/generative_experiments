@@ -1,4 +1,4 @@
-import cairocffi as cr
+import cairo as cr
 import logging
 from math import sqrt
 from time import time

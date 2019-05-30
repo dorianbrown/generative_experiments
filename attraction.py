@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import numpy as np
 from fn import Fn
-from matplotlib import cm
 
 from src.draw import Canvas
+from src.rnd import rnd_crc
+
 
 small_conf = {
     "width": 4000,
@@ -25,12 +26,11 @@ def acc_vec(_pos, _mass):
 with Canvas(**small_conf) as c:
 
     # Initial particle conditions
-    n = 10
-    # pos = np.random.multivariate_normal([500, 500], [[1000, 250], [250, 1000]], n)
+    n = 3000
     pos = np.random.uniform(0, 4000, (n, 2))
     mass = np.ones(n)*500
     # Add radial initial velocity
-    vel = np.zeros((n, 2), dtype=np.float)
+    vel = rnd_crc(n=n)
     dt = 0.5
 
     while pos.size > 1:
@@ -39,14 +39,12 @@ with Canvas(**small_conf) as c:
         pos_new = pos + vel*dt
 
         for old, new, v in zip(pos, pos_new, np.linalg.norm(vel, axis=1)):
-            alpha = min(1, 1 / v)
-            color = (*cm.viridis(v/10)[:3], alpha)
+            alpha = min(1, 0.75 / v)
             c.draw_line(old, new, rgba=(255, 255, 255, alpha), width=4)
 
         # Remove points we don't want to draw
         oob_idx = c.get_oob(pos_new)
-        # too_fast_idx = np.linalg.norm(vel, axis=1) > 8
-        remove_idx = oob_idx  # | too_fast_idx
+        remove_idx = oob_idx
 
         pos = pos_new[~remove_idx]
         mass = mass[~remove_idx]
